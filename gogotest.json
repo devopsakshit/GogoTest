@@ -1,0 +1,115 @@
+{
+  "id": "/sami/prod/apps/gogotest",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "gogotest:1e9ce7eb991662",
+      "network": "BRIDGE",
+      "parameters": [
+        {
+          "key": "label",
+          "value": "app=gogotest"
+        }
+      ],
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 0,
+          "servicePort": 3000,
+          "protocol": "tcp"
+        }
+      ]
+    },
+    "volumes": [
+      {
+        "containerPath": "/var/log/gogotest",
+        "hostPath": "/var/log/gogotest",
+        "mode": "RW"
+      },
+      {
+        "containerPath": "/opt/sami/config/logger.xml",
+        "hostPath": "/opt/sami/config/logger.xml",
+        "mode": "RW"
+      }
+    ]
+  },
+  "uris": [
+    "file:///root/.dockercfg"
+  ],
+  "dependencies": [
+    "/sami/prod/apps/xyz"
+  ],
+  "labels": {
+    "consul": "gogotest-3000",
+    "internal": "tag",
+    "prod": "tag",
+    "6781": "tag",
+    "traefik.frontend.rule": "PathPrefixStrip:/gogotest",
+    "traefik.backend": "-gogotest",
+    "traefik.backend.healthcheck.path": "/healthcheck",
+    "traefik.backend.healthcheck.interval": "10s",
+    "traefik.portIndex": "0",
+    "traefik.enable": "true"
+  },
+  "env": {
+    "SERVICE_3000_NAME": "gogotest",
+    "SERVICE_3000_CHECK_HTTP": "/healthcheck",
+    "SERVICE_3000_NAME": "gogotest-jmx-exporter",
+    "SERVICE_3000_CHECK_INTERVAL": "10s",
+    "SERVICE_3000_CHECK_TIMEOUT": "2s",
+    "SERVICE_REGION": "us-east-1",
+    "SERVICE_TAGS": "samiapp,prod",
+    "LOGSTASH_CONTEXT": "gogotest",
+    "INSTANCE_PARAMS": "-Dhttp.port=3000 -Dsami.deploy.product=gogotest -Dsami.deploy.env=prod -DSAMI_ZOOKEEPER_CONNECT= localhost:2181 -Dlogger.file=/opt/sami/config/logger.xml",
+    "JAVA_OPTS": "-Xms3072M -Xmx3072M -Xss2M -XX:MaxMetaspaceSize=1024m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -server -Djava.awt.headless=true -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/cdbwriter/java_heapdump%p.hprof -javaagent:/jmx_prometheus_javaagent-0.7-SNAPSHOT.jar=16341:/jmx_prometheus.yml",
+    "SAMI_LOG_DIR": "/var/log/gogotest",
+    "SAMI_DEPLOY_ENV": "prod",
+    "SAMI_LOG_LEVEL": "WARN",
+    "TZ": "America/Los_Angeles"
+  },
+  "constraints": [
+    [
+      "rack",
+      "GROUP_BY",
+      "3"
+    ],
+    [
+      "type",
+      "LIKE",
+      "app"
+    ],
+    [
+      "placement",
+      "LIKE",
+      "private"
+    ]
+  ],
+  "healthChecks": [
+    {
+      "path": "/healthcheck",
+      "protocol": "MESOS_HTTP",
+      "gracePeriodSeconds": 30,
+      "intervalSeconds": 10,
+      "portIndex": 0,
+      "timeoutSeconds": 10,
+      "maxConsecutiveFailures": 3
+    }
+  ],
+  "instances": 2,
+  "cpus": 2.0,
+  "mem": 3572.0,
+  "ports": [
+    0
+  ],
+  "backoffSeconds": 1,
+  "backoffFactor": 5.0,
+  "maxLaunchDelaySeconds": 3600,
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 1.0,
+    "maximumOverCapacity": 0.2
+  },
+  "args": [
+    "play",
+    "/opt/sami/gogotest/bin/gogotest"
+  ]
+}
