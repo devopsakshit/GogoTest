@@ -1,0 +1,5 @@
+ALERT Gogotest_Container_HighMemoryUsage
+  IF label_replace(label_replace(sum(container_memory_rss{container_label_app="gogotest"} *100/ (container_spec_memory_limit_bytes{container_label_app="gogotest"} > 0)) by (instance,id), "instance", "$1", "instance", "^(.+?).ec2.ssic.internal"), "id", "$1", "id", "^/docker/(.{0,11}).*") >80
+  FOR 5m
+  LABELS {severity="page"}
+  ANNOTATIONS {description="Gogotest conainer {{ $labels.id }} in the instance {{ $labels.instance }} has High memory usage (>80%) detected in the last 5 minutes, prediction says max memory will be reached before the next 2 hour. Instance: {{ $labels.instance }}, image: {{ $labels.image  }}, container: {{ $labels.id }}", summary="Container - High Memory Usage >80%"}
